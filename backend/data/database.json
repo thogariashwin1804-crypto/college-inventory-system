@@ -1,0 +1,108 @@
+{
+  "users": [
+    {
+      "userId": "USR-101",
+      "name": "Dr. Sarah Jenkins (HoD)",
+      "role": "admin",
+      "email": "admin@college.edu",
+      "password": "admin123",
+      "department": "Computer Science & Eng"
+    },
+    {
+      "userId": "USR-201",
+      "name": "Prof. Alan Turing",
+      "role": "faculty",
+      "email": "faculty@college.edu",
+      "password": "faculty123",
+      "department": "Computer Science & Eng"
+    },
+    {
+      "userId": "USR-301",
+      "name": "Ashwin Kumar",
+      "role": "student",
+      "email": "student@college.edu",
+      "password": "student123",
+      "department": "Computer Science & Eng"
+    }
+  ],
+  "items": [
+    {
+      "itemId": "ITM-001",
+      "name": "Dell",
+      "category": "Computers",
+      "quantity": 18,
+      "threshold": 5,
+      "purchaseDate": "2025-08-15",
+      "condition": "Good",
+      "status": "Active",
+      "image": "https://images.unsplash.com/photo-1593642632823-8f785ba67e45?w=300&auto=format&fit=crop&q=60"
+    },
+    {
+      "itemId": "ITM-002",
+      "name": "Epson",
+      "category": "Projectors",
+      "quantity": 2,
+      "threshold": 3,
+      "purchaseDate": "2025-06-10",
+      "condition": "Good",
+      "status": "Active",
+      "image": "https://images.unsplash.com/photo-1517604931442-7e0c8ed2963c?w=300&auto=format&fit=crop&q=60"
+    },
+    {
+      "itemId": "ITM-003",
+      "name": "Digital Oscilloscope",
+      "category": "Lab Equipment",
+      "quantity": 1,
+      "threshold": 4,
+      "purchaseDate": "2025-03-22",
+      "condition": "Good",
+      "status": "Active",
+      "image": "https://images.unsplash.com/photo-1581092160607-ee22621dd758?w=300&auto=format&fit=crop&q=60"
+    },
+    {
+      "itemId": "ITM-004",
+      "name": "Cisco Switch",
+      "category": "Electronics",
+      "quantity": 8,
+      "threshold": 2,
+      "purchaseDate": "2025-01-18",
+      "condition": "Good",
+      "status": "Active",
+      "image": "https://images.unsplash.com/photo-1544197150-b99a580bb7a8?w=300&auto=format&fit=crop&q=60"
+    }
+  ],
+  "issueRecords": [
+    {
+      "issueId": "ISS-1001",
+      "itemId": "ITM-002",
+      "itemName": "Epson EB-E01 XGA Projector",
+      "issuedTo": "USR-201",
+      "issuedToName": "Prof. Alan Turing",
+      "issuedToRole": "faculty",
+      "issuedBy": "USR-101",
+      "issuedByName": "Dr. Sarah Jenkins (HoD)",
+      "issueDate": "2026-11-10",
+      "returnDate": "2026-11-15",
+      "actualReturnDate": null,
+      "status": "Issued",
+      "department": "Computer Science & Eng",
+      "purpose": "Seminar Hall Lecture Series"
+    },
+    {
+      "issueId": "ISS-1002",
+      "itemId": "ITM-003",
+      "itemName": "Rigol DS1054Z Digital Oscilloscope",
+      "issuedTo": "USR-301",
+      "issuedToName": "Ashwin Kumar",
+      "issuedToRole": "student",
+      "issuedBy": "USR-201",
+      "issuedByName": "Prof. Alan Turing",
+      "issueDate": "2026-11-12",
+      "returnDate": "2026-11-14",
+      "actualReturnDate": null,
+      "status": "Issued",
+      "department": "Computer Science & Eng",
+      "purpose": "IoT Final Year Capstone Project"
+    }
+  ]
+}
