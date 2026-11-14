@@ -1,0 +1,944 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>College Inventory Management System</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            brand: {
+              50: '#eef2ff',
+              100: '#e0e7ff',
+              500: '#6366f1',
+              600: '#4f46e5',
+              700: '#4338ca',
+            }
+          }
+        }
+      }
+    }
+  </script>
+  <!-- Font Awesome Icons -->
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <!-- Chart.js CDN -->
+  <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+  <!-- Custom Styles -->
+  <link rel="stylesheet" href="styles.css">
+</head>
+<body class="bg-slate-50 min-h-screen text-slate-800 flex flex-col font-sans">
+
+  <!-- ============================================== -->
+  <!-- 1. LOGIN & AUTHENTICATION VIEW -->
+  <!-- ============================================== -->
+  <div id="authView" class="min-h-screen flex items-center justify-center p-4 bg-gradient-to-br from-slate-900 via-indigo-950 to-slate-900">
+    <div class="max-w-md w-full bg-white rounded-3xl p-8 shadow-2xl border border-slate-100">
+      
+      <!-- Brand & Header -->
+      <div class="text-center mb-6">
+        <div class="w-14 h-14 rounded-2xl bg-indigo-600 text-white mx-auto flex items-center justify-center text-2xl shadow-lg shadow-indigo-300 mb-3">
+          <i class="fa-solid fa-boxes-stacked"></i>
+        </div>
+        <div class="inline-block px-3 py-1 bg-indigo-50 text-indigo-700 text-xs font-bold rounded-full mb-2">
+          Academic Asset Portal
+        </div>
+        <h1 class="text-2xl font-black text-slate-900 tracking-tight leading-tight">College Inventory management system</h1>
+        <p class="text-xs text-slate-500 mt-1">Department of Computer Science & Engineering</p>
+      </div>
+
+      <!-- Login Form Container -->
+      <div id="loginFormContainer">
+        <!-- Role Selection Tabs (Automatically pre-populates role credentials) -->
+        <div class="mb-5">
+          <label class="block text-xs font-bold text-slate-700 mb-2 text-center uppercase tracking-wider">
+            Select Role to Login
+          </label>
+          <div class="grid grid-cols-3 gap-2 p-1.5 bg-slate-100 rounded-2xl" id="roleSelectorTabs">
+            <button type="button" data-role="admin" class="role-tab active py-2 text-xs font-bold rounded-xl bg-white text-indigo-600 shadow-sm transition">
+              <i class="fa-solid fa-user-shield block text-sm mb-1"></i>
+              Admin
+            </button>
+            <button type="button" data-role="faculty" class="role-tab py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition">
+              <i class="fa-solid fa-chalkboard-user block text-sm mb-1"></i>
+              Faculty
+            </button>
+            <button type="button" data-role="student" class="role-tab py-2 text-xs font-bold rounded-xl text-slate-600 hover:text-slate-900 transition">
+              <i class="fa-solid fa-graduation-cap block text-sm mb-1"></i>
+              Student
+            </button>
+          </div>
+        </div>
+
+        <form id="loginForm" class="space-y-4">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Institutional Email</label>
+            <div class="relative">
+              <i class="fa-solid fa-envelope absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+              <input type="email" id="loginEmail" required value="admin@college.edu" class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+            <div class="relative">
+              <i class="fa-solid fa-lock absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+              <input type="password" id="loginPassword" required value="admin123" class="w-full pl-9 pr-4 py-2.5 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+          </div>
+
+          <div id="loginErrorMsg" class="hidden text-xs text-rose-600 font-bold bg-rose-50 p-2.5 rounded-xl border border-rose-200"></div>
+
+          <button type="submit" class="w-full py-3 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-extrabold rounded-xl shadow-lg shadow-indigo-200 transition">
+            Sign In to Dashboard &rarr;
+          </button>
+        </form>
+
+        <div class="mt-6 text-center pt-4 border-t border-slate-100">
+          <button type="button" id="btnToggleRegister" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+            Need a new account? Register here
+          </button>
+        </div>
+      </div>
+
+      <!-- Registration Form Container (Toggleable) -->
+      <div id="registerFormContainer" class="hidden">
+        <h3 class="text-sm font-extrabold text-slate-800 mb-3 text-center">Register Institutional Account</h3>
+        <form id="registerForm" class="space-y-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Full Name</label>
+            <input type="text" id="regName" required placeholder="e.g. Dr. John Doe" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Account Role</label>
+            <select id="regRole" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500 font-semibold">
+              <option value="faculty">Faculty / Lab Assistant</option>
+              <option value="student">Student</option>
+              <option value="admin">Department Admin (HoD)</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Department</label>
+            <input type="text" id="regDept" value="Computer Science & Eng" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Email</label>
+            <input type="email" id="regEmail" required placeholder="name@college.edu" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Password</label>
+            <input type="password" id="regPassword" required placeholder="••••••••" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+          </div>
+          <button type="submit" class="w-full py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white text-xs font-bold rounded-xl shadow-md transition">
+            Create Account
+          </button>
+          <div class="text-center pt-2">
+            <button type="button" id="btnBackToLogin" class="text-xs font-bold text-slate-500 hover:text-slate-800">
+              &larr; Back to Login
+            </button>
+          </div>
+        </form>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- 2. MAIN APPLICATION DASHBOARD VIEW (AFTER LOGIN) -->
+  <!-- ============================================== -->
+  <div id="dashboardView" class="hidden flex-1 flex flex-col">
+
+    <!-- Top Navigation Header -->
+    <header class="bg-white border-b border-slate-200 sticky top-0 z-30 shadow-sm">
+      <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+        <div class="flex justify-between items-center h-16">
+          
+          <!-- Brand / Title -->
+          <div class="flex items-center space-x-3">
+            <div class="w-10 h-10 rounded-xl bg-indigo-600 flex items-center justify-center text-white shadow-md shadow-indigo-200">
+              <i class="fa-solid fa-boxes-stacked text-lg"></i>
+            </div>
+            <div>
+              <div class="flex items-center space-x-2">
+                <span class="font-extrabold text-lg text-slate-900 tracking-tight">College<span class="text-indigo-600">Inventory</span></span>
+                <span class="text-xs bg-indigo-100 text-indigo-700 px-2.5 py-0.5 rounded-full font-semibold">Portal</span>
+              </div>
+              <p class="text-xs text-slate-500">Dept. of Computer Science & Engineering</p>
+            </div>
+          </div>
+
+          <!-- User Profile & Explicit Logout Button -->
+          <div class="flex items-center space-x-4">
+            
+            <!-- Fixed User Profile Pill (No role dropdown here) -->
+            <div class="flex items-center space-x-3 pl-3">
+              <div class="w-9 h-9 rounded-full bg-indigo-100 text-indigo-700 font-extrabold flex items-center justify-center text-xs shadow-inner" id="userAvatar">
+                AD
+              </div>
+              <div class="text-left hidden sm:block">
+                <div class="text-xs font-bold text-slate-800 leading-tight" id="userNameNav">Dr. Sarah Jenkins</div>
+                <div class="text-[11px] font-semibold text-indigo-600" id="userRoleNav">Department Admin</div>
+              </div>
+            </div>
+
+            <!-- Logout Button -->
+            <button id="btnLogout" class="flex items-center space-x-1.5 px-3 py-1.5 rounded-xl bg-rose-50 hover:bg-rose-100 text-rose-700 border border-rose-200 text-xs font-bold transition shadow-sm" title="Log out of system">
+              <i class="fa-solid fa-arrow-right-from-bracket"></i>
+              <span>Logout</span>
+            </button>
+
+          </div>
+
+        </div>
+      </div>
+    </header>
+
+    <!-- Main Container -->
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6 w-full flex-1 flex flex-col md:flex-row gap-6">
+
+      <!-- Sidebar Navigation -->
+      <aside class="w-full md:w-60 flex-shrink-0">
+        <div class="bg-white rounded-2xl border border-slate-200 p-3 shadow-sm sticky top-24">
+          <div class="text-[11px] font-bold text-slate-400 uppercase tracking-wider px-3 py-2" id="sidebarRoleHeading">Admin Navigation</div>
+          
+          <nav class="space-y-1" id="mainSidebarNav">
+            
+            <!-- ADMIN SPECIFIC TABS -->
+            <button data-tab="dashboard" class="nav-link admin-nav-item active w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-chart-pie w-5 text-center text-slate-400"></i>
+              <span>Dashboard</span>
+            </button>
+            
+            <button data-tab="items" class="nav-link admin-nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-box-archive w-5 text-center text-slate-400"></i>
+              <span>Item Inventory</span>
+            </button>
+
+            <button data-tab="issue-tracker" class="nav-link admin-nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-hand-holding-hand w-5 text-center text-slate-400"></i>
+              <span>Issue Tracker</span>
+            </button>
+
+            <button data-tab="reports" class="nav-link admin-nav-item w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-chart-column w-5 text-center text-slate-400"></i>
+              <span>Analytics & Reports</span>
+            </button>
+
+            <!-- FACULTY SPECIFIC TABS (Per Photo: View available items, Request/Issue for short-term, Return items) -->
+            <button data-tab="faculty-available" class="nav-link faculty-nav-item hidden w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-boxes-stacked w-5 text-center text-slate-400"></i>
+              <span>Available Lab Items</span>
+            </button>
+
+            <button data-tab="faculty-my-issues" class="nav-link faculty-nav-item hidden w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-clock-rotate-left w-5 text-center text-slate-400"></i>
+              <span>My Active Checkouts</span>
+            </button>
+
+            <!-- STUDENT SPECIFIC TABS (Per Photo: View issued items, Acknowledge returns) -->
+            <button data-tab="student-my-items" class="nav-link student-nav-item hidden w-full flex items-center space-x-3 px-3 py-2.5 rounded-xl text-sm font-semibold text-slate-600 hover:bg-slate-100 transition">
+              <i class="fa-solid fa-user-tag w-5 text-center text-slate-400"></i>
+              <span>My Issued Assets</span>
+            </button>
+
+          </nav>
+
+        </div>
+      </aside>
+
+      <!-- Main Content Area -->
+      <main class="flex-1 min-w-0">
+
+        <!-- ============================================== -->
+        <!-- VIEW A: ADMIN DASHBOARD (ADMIN ONLY) -->
+        <!-- ============================================== -->
+        <section id="tab-dashboard" class="tab-content space-y-6">
+          
+          <!-- Low Stock Threshold Warning Banner: ONLY inside Admin Dashboard! -->
+          <div id="lowStockGlobalBanner" class="hidden bg-rose-50 border border-rose-200 rounded-2xl p-4 alert-pulse">
+            <div class="flex items-start justify-between">
+              <div class="flex items-center space-x-3">
+                <div class="w-10 h-10 rounded-xl bg-rose-500 text-white flex items-center justify-center font-bold text-lg shadow-md shadow-rose-200">
+                  <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                  <h4 class="text-sm font-bold text-rose-900" id="lowStockBannerTitle">Low Stock Alert!</h4>
+                  <p class="text-xs text-rose-700 mt-0.5" id="lowStockBannerDesc">
+                    Certain critical laboratory assets have fallen below their safety threshold.
+                  </p>
+                </div>
+              </div>
+              <button id="btnViewLowStock" class="px-3 py-1.5 bg-rose-600 hover:bg-rose-700 text-white text-xs font-bold rounded-lg transition shadow-sm">
+                View Items
+              </button>
+            </div>
+          </div>
+
+          <div class="bg-gradient-to-r from-indigo-700 via-indigo-600 to-indigo-800 rounded-3xl p-6 sm:p-8 text-white shadow-xl shadow-indigo-100 flex flex-col md:flex-row md:items-center justify-between gap-6">
+            <div>
+              <div class="inline-flex items-center space-x-2 px-3 py-1 rounded-full bg-indigo-500/30 text-indigo-100 text-xs font-semibold mb-3">
+                <i class="fa-solid fa-user-shield"></i>
+                <span>Department Admin Console</span>
+              </div>
+              <h1 class="text-2xl sm:text-3xl font-extrabold tracking-tight" id="dashGreeting">Welcome Back, Dr. Sarah Jenkins</h1>
+              <p class="text-indigo-100 text-sm mt-1 max-w-xl">
+                Oversee department lab equipment, manage safety thresholds, issue equipment, and monitor real-time stock availability.
+              </p>
+            </div>
+            <div class="flex flex-wrap gap-2.5">
+              <button id="btnDashAddItem" class="px-4 py-2.5 bg-white text-indigo-700 hover:bg-indigo-50 rounded-xl font-bold text-sm shadow-md transition flex items-center space-x-2">
+                <i class="fa-solid fa-circle-plus"></i>
+                <span>Add Item</span>
+              </button>
+              <button id="btnDashIssueItem" class="px-4 py-2.5 bg-indigo-500 hover:bg-indigo-400 text-white rounded-xl font-bold text-sm shadow-md transition flex items-center space-x-2">
+                <i class="fa-solid fa-arrow-right-arrow-left"></i>
+                <span>Issue Asset</span>
+              </button>
+            </div>
+          </div>
+
+          <!-- 4 KPI Summary Cards -->
+          <div class="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            <!-- Total Items -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Total Items</span>
+                <div class="w-10 h-10 rounded-xl bg-indigo-50 text-indigo-600 flex items-center justify-center">
+                  <i class="fa-solid fa-layer-group text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-4 flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-slate-900" id="statTotalItems">0</span>
+                <span class="text-xs text-slate-500 font-medium">units</span>
+              </div>
+              <div class="mt-2 text-xs text-slate-500">
+                <span class="text-indigo-600 font-semibold" id="statUniqueAssets">0</span> distinct asset models
+              </div>
+            </div>
+
+            <!-- Issued Items -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Issued Items</span>
+                <div class="w-10 h-10 rounded-xl bg-orange-50 text-orange-600 flex items-center justify-center">
+                  <i class="fa-solid fa-arrow-up-right-from-square text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-4 flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-slate-900" id="statIssuedItems">0</span>
+                <span class="text-xs text-slate-500 font-medium">currently out</span>
+              </div>
+              <div class="mt-2 text-xs text-slate-500">Assigned to staff & students</div>
+            </div>
+
+            <!-- Available Items -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Available Items</span>
+                <div class="w-10 h-10 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center">
+                  <i class="fa-solid fa-circle-check text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-4 flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-slate-900" id="statAvailableItems">0</span>
+                <span class="text-xs text-slate-500 font-medium">in stock</span>
+              </div>
+              <div class="mt-2 text-xs text-slate-500">Ready for lab deployment</div>
+            </div>
+
+            <!-- Low Stock Alerts -->
+            <div class="bg-white rounded-2xl p-5 border border-slate-200 shadow-sm">
+              <div class="flex items-center justify-between">
+                <span class="text-xs font-bold text-slate-500 uppercase tracking-wider">Low Stock Alerts</span>
+                <div class="w-10 h-10 rounded-xl bg-rose-50 text-rose-600 flex items-center justify-center">
+                  <i class="fa-solid fa-bell text-lg"></i>
+                </div>
+              </div>
+              <div class="mt-4 flex items-baseline space-x-2">
+                <span class="text-3xl font-extrabold text-rose-600" id="statLowStockAlerts">0</span>
+                <span class="text-xs text-slate-500 font-medium">items</span>
+              </div>
+              <div class="mt-2 text-xs text-rose-600 font-medium">Below safety threshold</div>
+            </div>
+          </div>
+
+          <!-- Quick Activity & Low Stock Watchlist -->
+          <div class="grid grid-cols-1 lg:grid-cols-3 gap-6">
+            <div class="lg:col-span-2 bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+              <div class="flex items-center justify-between mb-4">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                  <i class="fa-solid fa-clock-rotate-left text-indigo-600"></i>
+                  <span>Recent Issue & Return Activity</span>
+                </h3>
+                <button id="btnViewAllIssues" class="text-xs font-bold text-indigo-600 hover:text-indigo-800">
+                  View All &rarr;
+                </button>
+              </div>
+              <div class="overflow-x-auto">
+                <table class="w-full text-left text-xs">
+                  <thead>
+                    <tr class="text-slate-400 border-b border-slate-100 uppercase text-[10px] tracking-wider">
+                      <th class="py-2.5">Item Name</th>
+                      <th class="py-2.5">Borrower</th>
+                      <th class="py-2.5">Issue Date</th>
+                      <th class="py-2.5">Due Date</th>
+                      <th class="py-2.5">Status</th>
+                    </tr>
+                  </thead>
+                  <tbody id="dashRecentIssuesTable" class="divide-y divide-slate-50 text-slate-700"></tbody>
+                </table>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between mb-3">
+                <h3 class="font-bold text-slate-800 text-sm flex items-center space-x-2">
+                  <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+                  <span>Low Stock Watchlist</span>
+                </h3>
+                <span class="text-xs bg-rose-100 text-rose-700 font-bold px-2 py-0.5 rounded-full" id="dashLowStockBadge">0</span>
+              </div>
+              <div class="flex-1 overflow-y-auto max-h-60 space-y-2.5" id="dashLowStockList"></div>
+            </div>
+          </div>
+
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW B: ADMIN ITEM INVENTORY (ADMIN ONLY) -->
+        <!-- ============================================== -->
+        <section id="tab-items" class="tab-content hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Department Item Management</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Add, edit, delete, and configure inventory items and safety thresholds.</p>
+            </div>
+            <button id="btnOpenAddItemModal" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center space-x-2">
+              <i class="fa-solid fa-plus"></i>
+              <span>Add New Item</span>
+            </button>
+          </div>
+
+          <!-- Filter Toolbar -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col md:flex-row gap-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+              <input type="text" id="itemSearchInput" placeholder="Search by item name or ID..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+            </div>
+            <div class="w-full md:w-48">
+              <select id="itemCategoryFilter" class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 font-medium text-slate-700">
+                <option value="All">All Categories</option>
+                <option value="Computers">Computers</option>
+                <option value="Lab Equipment">Lab Equipment</option>
+                <option value="Projectors">Projectors</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+              </select>
+            </div>
+            <div class="w-full md:w-40">
+              <select id="itemStatusFilter" class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 font-medium text-slate-700">
+                <option value="All">All Stock Levels</option>
+                <option value="Available">Available</option>
+                <option value="Low Stock">Low Stock</option>
+                <option value="Out of Stock">Out of Stock</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 text-[11px] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th class="py-3 px-4">Item Details</th>
+                    <th class="py-3 px-4">Category</th>
+                    <th class="py-3 px-4 text-center">Quantity</th>
+                    <th class="py-3 px-4">Threshold</th>
+                    <th class="py-3 px-4">Condition</th>
+                    <th class="py-3 px-4">Purchase Date</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="inventoryTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+              </table>
+            </div>
+            <div id="itemsEmptyState" class="hidden py-12 text-center text-slate-400 text-xs">
+              No inventory items found.
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW C: ADMIN ISSUE TRACKER (ADMIN ONLY) -->
+        <!-- ============================================== -->
+        <section id="tab-issue-tracker" class="tab-content hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Issue & Return Management</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Track items issued to staff or students, mark returns, and generate slips.</p>
+            </div>
+            <button id="btnOpenIssueAssetModal" class="px-4 py-2.5 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center space-x-2">
+              <i class="fa-solid fa-hand-holding-hand"></i>
+              <span>Issue Asset to Borrower</span>
+            </button>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+              <input type="text" id="issueSearchInput" placeholder="Search by item name, borrower name or Issue ID..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200">
+            </div>
+            <div class="w-full sm:w-44">
+              <select id="issueStatusFilter" class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 font-medium text-slate-700">
+                <option value="All">All Statuses</option>
+                <option value="Issued">Currently Issued</option>
+                <option value="Returned">Returned</option>
+              </select>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 shadow-sm overflow-hidden">
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 text-[11px] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th class="py-3 px-4">Issue ID</th>
+                    <th class="py-3 px-4">Item Name</th>
+                    <th class="py-3 px-4">Borrower</th>
+                    <th class="py-3 px-4">Issued By</th>
+                    <th class="py-3 px-4">Issue Date</th>
+                    <th class="py-3 px-4">Due Date</th>
+                    <th class="py-3 px-4">Status</th>
+                    <th class="py-3 px-4 text-right">Actions</th>
+                  </tr>
+                </thead>
+                <tbody id="issueTrackerTableBody" class="divide-y divide-slate-100 text-slate-700 font-medium"></tbody>
+              </table>
+            </div>
+            <div id="issueEmptyState" class="hidden py-12 text-center text-slate-400 text-xs">
+              No issue records found.
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW D: ADMIN REPORTS & ANALYTICS (ADMIN ONLY) -->
+        <!-- ============================================== -->
+        <section id="tab-reports" class="tab-content hidden space-y-6">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Inventory Reports & Analytics</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Department asset distribution, stock utilization, and low-inventory warnings.</p>
+            </div>
+            <div class="flex space-x-2">
+              <button id="btnExportCSV" class="px-3 py-2 bg-white border border-slate-200 hover:bg-slate-50 text-slate-700 rounded-xl font-bold text-xs shadow-sm transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-file-csv text-emerald-600"></i>
+                <span>Export CSV</span>
+              </button>
+              <button onclick="window.print()" class="px-3 py-2 bg-indigo-600 hover:bg-indigo-700 text-white rounded-xl font-bold text-xs shadow-md transition flex items-center space-x-1.5">
+                <i class="fa-solid fa-print"></i>
+                <span>Print Report</span>
+              </button>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 lg:grid-cols-2 gap-6">
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm">Asset Distribution by Category</h3>
+                  <p class="text-xs text-slate-500">Pie chart breakdown of inventory stock</p>
+                </div>
+                <span class="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-lg">Chart.js</span>
+              </div>
+              <div class="relative flex-1 flex items-center justify-center min-h-[260px]">
+                <canvas id="categoryPieChart"></canvas>
+              </div>
+            </div>
+
+            <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm flex flex-col">
+              <div class="flex items-center justify-between mb-4">
+                <div>
+                  <h3 class="font-bold text-slate-800 text-sm">Issued vs. Available Stock</h3>
+                  <p class="text-xs text-slate-500">Asset availability comparison</p>
+                </div>
+                <span class="text-xs bg-slate-100 text-slate-600 font-semibold px-2 py-0.5 rounded-lg">Bar Chart</span>
+              </div>
+              <div class="relative flex-1 flex items-center justify-center min-h-[260px]">
+                <canvas id="issuedVsAvailableBarChart"></canvas>
+              </div>
+            </div>
+          </div>
+
+          <!-- Low Stock Items Table -->
+          <div class="bg-white rounded-2xl border border-slate-200 p-5 shadow-sm">
+            <h3 class="font-bold text-slate-800 text-sm mb-3 flex items-center space-x-2">
+              <i class="fa-solid fa-triangle-exclamation text-rose-500"></i>
+              <span>Low-Stock Inventory Table</span>
+            </h3>
+            <div class="overflow-x-auto">
+              <table class="w-full text-left text-xs">
+                <thead class="bg-slate-50 text-slate-500 border-b border-slate-200 text-[11px] uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th class="py-2.5 px-3">Item ID</th>
+                    <th class="py-2.5 px-3">Item Name</th>
+                    <th class="py-2.5 px-3">Category</th>
+                    <th class="py-2.5 px-3">Current Qty</th>
+                    <th class="py-2.5 px-3">Threshold</th>
+                    <th class="py-2.5 px-3">Shortfall</th>
+                    <th class="py-2.5 px-3">Status</th>
+                  </tr>
+                </thead>
+                <tbody id="reportsLowStockTableBody" class="divide-y divide-slate-100 text-slate-700"></tbody>
+              </table>
+            </div>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW E: FACULTY AVAILABLE ITEMS (PER PHOTO) -->
+        <!-- ============================================== -->
+        <section id="tab-faculty-available" class="tab-content hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-emerald-50 text-emerald-700 text-xs font-bold mb-2">
+                <i class="fa-solid fa-chalkboard-user"></i>
+                <span>Faculty / Lab Assistant Portal</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">Available Department Assets</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Browse laboratory equipment and request or issue items for short-term use.</p>
+            </div>
+          </div>
+
+          <div class="bg-white rounded-2xl border border-slate-200 p-4 shadow-sm flex flex-col sm:flex-row gap-3">
+            <div class="relative flex-1">
+              <i class="fa-solid fa-magnifying-glass absolute left-3.5 top-3 text-slate-400 text-xs"></i>
+              <input type="text" id="facultySearchInput" placeholder="Search available lab equipment..." class="w-full pl-9 pr-4 py-2 text-xs rounded-xl border border-slate-200">
+            </div>
+            <div class="w-full sm:w-48">
+              <select id="facultyCategoryFilter" class="w-full py-2 px-3 text-xs rounded-xl border border-slate-200 font-medium text-slate-700">
+                <option value="All">All Categories</option>
+                <option value="Computers">Computers</option>
+                <option value="Lab Equipment">Lab Equipment</option>
+                <option value="Projectors">Projectors</option>
+                <option value="Electronics">Electronics</option>
+                <option value="Furniture">Furniture</option>
+              </select>
+            </div>
+          </div>
+
+          <!-- Faculty Available Items Grid -->
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="facultyAvailableGrid"></div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW F: FACULTY MY ACTIVE CHECKOUTS & RETURN -->
+        <!-- ============================================== -->
+        <section id="tab-faculty-my-issues" class="tab-content hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">My Active Checkouts</h2>
+              <p class="text-xs text-slate-500 mt-0.5">Items currently issued to you. You can return equipment immediately after use.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="facultyMyIssuesGrid"></div>
+          
+          <div id="facultyEmptyIssues" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-3xl mb-2 block"></i>
+            <h4 class="font-bold text-slate-800 text-sm">No Active Checkouts</h4>
+            <p class="text-xs mt-1">You currently have no laboratory items checked out under your profile.</p>
+          </div>
+        </section>
+
+        <!-- ============================================== -->
+        <!-- VIEW G: STUDENT MY ISSUED ITEMS -->
+        <!-- ============================================== -->
+        <section id="tab-student-my-items" class="tab-content hidden space-y-5">
+          <div class="flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+            <div>
+              <div class="inline-flex items-center space-x-1.5 px-3 py-1 rounded-full bg-indigo-50 text-indigo-700 text-xs font-bold mb-2">
+                <i class="fa-solid fa-graduation-cap"></i>
+                <span>Student Portal</span>
+              </div>
+              <h2 class="text-xl font-extrabold text-slate-900 tracking-tight">My Issued Equipment</h2>
+              <p class="text-xs text-slate-500 mt-0.5">View items issued under your name and check return due dates.</p>
+            </div>
+          </div>
+
+          <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-5" id="studentMyItemsGrid"></div>
+
+          <div id="studentEmptyItems" class="hidden bg-white rounded-2xl border border-slate-200 p-12 text-center text-slate-400">
+            <i class="fa-solid fa-circle-check text-emerald-500 text-3xl mb-2 block"></i>
+            <h4 class="font-bold text-slate-800 text-sm">No Active Items Issued</h4>
+            <p class="text-xs mt-1">You do not have any department equipment currently checked out.</p>
+          </div>
+        </section>
+
+      </main>
+
+    </div>
+
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 1: ADD / EDIT ITEM (ADMIN ONLY) -->
+  <!-- ============================================== -->
+  <div id="itemModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <h3 class="font-extrabold text-slate-900 text-base" id="itemModalTitle">Add Inventory Item</h3>
+        <button type="button" class="closeModalBtn text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="itemForm" class="mt-4 space-y-4">
+        <input type="hidden" id="itemFormId">
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Item Name *</label>
+          <input type="text" id="itemNameInput" required placeholder="e.g. Dell OptiPlex Desktop 7090" class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200 focus:outline-none focus:ring-2 focus:ring-indigo-500">
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Category *</label>
+            <select id="itemCategoryInput" required class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200">
+              <option value="Computers">Computers</option>
+              <option value="Lab Equipment">Lab Equipment</option>
+              <option value="Projectors">Projectors</option>
+              <option value="Electronics">Electronics</option>
+              <option value="Furniture">Furniture</option>
+            </select>
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Condition *</label>
+            <select id="itemConditionInput" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200">
+              <option value="Good">Good (Working)</option>
+              <option value="New">New</option>
+              <option value="Fair">Fair</option>
+              <option value="Needs Repair">Needs Repair</option>
+            </select>
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Total Quantity *</label>
+            <input type="number" id="itemQuantityInput" min="0" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Low Stock Threshold *</label>
+            <input type="number" id="itemThresholdInput" min="1" value="5" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-3">
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Purchase Date</label>
+            <input type="date" id="itemPurchaseDateInput" class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+          </div>
+          <div>
+            <label class="block text-xs font-bold text-slate-700 mb-1">Item Image URL</label>
+            <input type="url" id="itemImageInput" placeholder="https://..." class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+          </div>
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
+          <button type="button" class="closeModalBtn px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow-md">
+            Save Item
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 2: ADMIN ISSUE ASSET MODAL -->
+  <!-- ============================================== -->
+  <div id="issueModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-lg w-full p-6 shadow-2xl border border-slate-100">
+      
+      <div class="flex items-center justify-between pb-4 border-b border-slate-100">
+        <div>
+          <h3 class="font-extrabold text-slate-900 text-base">Issue Inventory Asset</h3>
+          <p class="text-xs text-slate-500">Assign equipment to student or faculty</p>
+        </div>
+        <button type="button" class="closeModalBtn text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="issueForm" class="mt-4 space-y-4">
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Select Asset *</label>
+          <select id="issueItemSelect" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Borrower (Faculty / Student) *</label>
+          <select id="issueUserSelect" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200"></select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Due Return Date *</label>
+          <input type="date" id="issueReturnDateInput" required class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Purpose / Course Note</label>
+          <input type="text" id="issuePurposeInput" placeholder="e.g. Lab Project / Class Demonstration" class="w-full px-3.5 py-2 text-xs rounded-xl border border-slate-200">
+        </div>
+
+        <div class="pt-4 border-t border-slate-100 flex justify-end space-x-2">
+          <button type="button" class="closeModalBtn px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-orange-600 hover:bg-orange-700 text-xs font-bold text-white shadow-md">
+            Confirm & Issue Asset
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 3: FACULTY SHORT-TERM REQUEST / ISSUE MODAL -->
+  <!-- ============================================== -->
+  <div id="facultyRequestModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-md w-full p-6 shadow-2xl border border-slate-100">
+      
+      <div class="flex items-center justify-between pb-3 border-b border-slate-100">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-9 h-9 rounded-xl bg-emerald-50 text-emerald-600 flex items-center justify-center font-bold">
+            <i class="fa-solid fa-hand-holding-hand"></i>
+          </div>
+          <div>
+            <h3 class="font-extrabold text-slate-900 text-sm">Request / Issue for Short-Term</h3>
+            <p class="text-[11px] text-slate-500">For lab sessions & class use</p>
+          </div>
+        </div>
+        <button type="button" class="closeModalBtn text-slate-400 hover:text-slate-600 p-1 rounded-lg">
+          <i class="fa-solid fa-xmark text-lg"></i>
+        </button>
+      </div>
+
+      <form id="facultyRequestForm" class="mt-4 space-y-4">
+        <input type="hidden" id="facultyReqItemId">
+
+        <div class="p-3 bg-slate-50 rounded-xl border border-slate-200">
+          <div class="text-xs font-bold text-slate-800" id="facultyReqItemName">Dell Desktop</div>
+          <div class="text-[11px] text-slate-500 mt-0.5" id="facultyReqItemMeta">Category: Computers &bull; Available: 10 units</div>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Short-Term Duration *</label>
+          <select id="facultyReqDuration" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200 font-semibold">
+            <option value="1">1 Day (Return today / tomorrow)</option>
+            <option value="3">3 Days (Short Lab Exercise)</option>
+            <option value="7" selected>1 Week (Standard Academic Term)</option>
+          </select>
+        </div>
+
+        <div>
+          <label class="block text-xs font-bold text-slate-700 mb-1">Purpose / Lab Session *</label>
+          <input type="text" id="facultyReqPurpose" required placeholder="e.g. Microprocessors Lab Session II" class="w-full px-3 py-2 text-xs rounded-xl border border-slate-200">
+        </div>
+
+        <div class="pt-3 border-t border-slate-100 flex justify-end space-x-2">
+          <button type="button" class="closeModalBtn px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+            Cancel
+          </button>
+          <button type="submit" class="px-5 py-2 rounded-xl bg-emerald-600 hover:bg-emerald-700 text-xs font-bold text-white shadow-md">
+            Confirm & Issue Equipment
+          </button>
+        </div>
+      </form>
+
+    </div>
+  </div>
+
+  <!-- ============================================== -->
+  <!-- MODAL 4: PRINTABLE ISSUE SLIP -->
+  <!-- ============================================== -->
+  <div id="issueSlipModal" class="fixed inset-0 z-50 hidden overflow-y-auto bg-slate-900/60 backdrop-blur-sm flex items-center justify-center p-4">
+    <div class="bg-white rounded-3xl max-w-xl w-full p-6 shadow-2xl border border-slate-100">
+      
+      <div id="issueSlipPrintArea" class="bg-white p-6 border-2 border-slate-800 rounded-xl font-sans text-slate-900">
+        <div class="text-center border-b-2 border-slate-800 pb-3 mb-4">
+          <h2 class="text-lg font-black tracking-wider uppercase">College of Engineering & Technology</h2>
+          <p class="text-xs font-semibold text-slate-600">Department of Computer Science & Engineering - Lab Asset Cell</p>
+          <div class="inline-block mt-2 px-3 py-1 bg-slate-900 text-white text-xs font-extrabold uppercase tracking-widest rounded">
+            Official Equipment Issue Slip
+          </div>
+        </div>
+
+        <div class="grid grid-cols-2 gap-4 text-xs mb-4">
+          <div>
+            <p><span class="font-bold text-slate-500">Issue Slip No:</span> <span id="slipIssueId" class="font-mono font-bold text-slate-900">ISS-0000</span></p>
+            <p class="mt-1"><span class="font-bold text-slate-500">Issue Date:</span> <span id="slipIssueDate" class="font-bold">2026-11-14</span></p>
+            <p class="mt-1"><span class="font-bold text-slate-500">Due Return Date:</span> <span id="slipReturnDate" class="font-bold text-orange-600">2026-11-21</span></p>
+          </div>
+          <div>
+            <p><span class="font-bold text-slate-500">Issued To:</span> <span id="slipBorrowerName" class="font-bold text-slate-900">Ashwin Kumar</span></p>
+            <p class="mt-1"><span class="font-bold text-slate-500">Role / Dept:</span> <span id="slipBorrowerRole" class="font-bold">Student (CSE)</span></p>
+            <p class="mt-1"><span class="font-bold text-slate-500">Issued By:</span> <span id="slipIssuedByName" class="font-bold">Dr. Sarah Jenkins</span></p>
+          </div>
+        </div>
+
+        <div class="border border-slate-300 rounded-lg p-3 bg-slate-50 mb-4 text-xs">
+          <h4 class="font-bold text-slate-800 mb-1">Equipment Details:</h4>
+          <div class="grid grid-cols-2 gap-2">
+            <div><span class="text-slate-500">Asset Name:</span> <span id="slipItemName" class="font-bold text-slate-900">Rigol DS1054Z Digital Oscilloscope</span></div>
+            <div><span class="text-slate-500">Asset Code:</span> <span id="slipItemId" class="font-mono font-bold">ITM-003</span></div>
+            <div><span class="text-slate-500">Purpose:</span> <span id="slipPurpose" class="font-bold">Lab Capstone Project</span></div>
+            <div><span class="text-slate-500">Condition at Issue:</span> <span class="font-bold text-emerald-600">Verified Working</span></div>
+          </div>
+        </div>
+
+        <p class="text-[10px] text-slate-500 italic mb-6">
+          * Terms: The borrower agrees to return this department asset on or before the due date in proper condition.
+        </p>
+
+        <div class="grid grid-cols-2 gap-8 pt-6 border-t border-slate-300 text-center text-xs">
+          <div>
+            <div class="h-8 border-b border-dashed border-slate-400"></div>
+            <p class="mt-1.5 font-bold text-slate-700">Borrower Signature</p>
+          </div>
+          <div>
+            <div class="h-8 border-b border-dashed border-slate-400"></div>
+            <p class="mt-1.5 font-bold text-slate-700">Lab In-Charge / HoD Seal</p>
+          </div>
+        </div>
+      </div>
+
+      <div class="mt-5 flex justify-end space-x-2 no-print">
+        <button type="button" class="closeModalBtn px-4 py-2 rounded-xl border border-slate-200 text-xs font-bold text-slate-600">
+          Close
+        </button>
+        <button type="button" onclick="window.print()" class="px-5 py-2 rounded-xl bg-indigo-600 hover:bg-indigo-700 text-xs font-bold text-white shadow-md flex items-center space-x-2">
+          <i class="fa-solid fa-print"></i>
+          <span>Print Slip</span>
+        </button>
+      </div>
+
+    </div>
+  </div>
+
+  <!-- Scripts -->
+  <script src="js/api.js"></script>
+  <script src="js/app.js"></script>
+</body>
+</html>
